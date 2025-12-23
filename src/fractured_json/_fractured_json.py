@@ -1,5 +1,4 @@
 import argparse
-import json
 import logging
 import sys
 
@@ -75,6 +74,18 @@ def command_line_parser() -> argparse.ArgumentParser:
             )
 
     parser.add_argument(
+        "--debug",
+        default=False,
+        action="store_true",
+        help="Enable debug logging",
+    )
+    parser.add_argument(
+        "--east-asian-chars",
+        default=False,
+        action="store_true",
+        help="Treat strings as unicode East Asian characters",
+    )
+    parser.add_argument(
         "json",
         nargs="*",
         type=argparse.FileType("r"),
@@ -97,32 +108,9 @@ def main() -> None:  # noqa: C901, PLR0915, PLR0912
         parser.print_help()
     else:
         formatter = Formatter()
-        formatter.comma_padding = args.comma_padding
-        formatter.colon_padding = args.colon_padding
-        formatter.max_inline_length = args.max_inline_length
-        formatter.max_inline_complexity = args.max_inline_complexity
-        formatter.max_compact_list_complexity = args.max_compact_list_complexity
-        formatter.multiline_compact_dict = args.multiline_compact_dict
-        formatter.indent_spaces = args.indent
-        if args.crlf:
-            formatter.json_eol_style = EolStyle.CRLF
-        if args.align_properties:
-            formatter.align_expanded_property_names = True
-        if args.bracket_padding == "simple":
-            formatter.nested_bracket_padding = False
-            formatter.simple_bracket_padding = True
-        else:
-            formatter.nested_bracket_padding = True
-            formatter.simple_bracket_padding = False
-        if args.tab_indent:
-            formatter.use_tab_to_indent = True
-        if not args.justify_numbers:
-            formatter.dont_justify_numbers = False
-        if args.prefix_string is not None:
-            formatter.prefix_string = args.prefix_string
-        formatter.omit_trailing_whitespace = args.omit_trailing_whitespace
-        formatter.east_asian_string_widths = args.east_asian_chars
-        formatter.ensure_ascii = not args.no_ensure_ascii
+        default_options = FracturedJsonOptions()
+        for name in default_options.list_options():
+            setattr(formatter, name, getattr(args, name))
 
         hdlr = logging.StreamHandler()
         hdlr.setFormatter(logging.Formatter("%(levelname)s:%(name)s:%(message)s"))
@@ -132,27 +120,26 @@ def main() -> None:  # noqa: C901, PLR0915, PLR0912
         else:
             logger.setLevel("ERROR")
 
-        formatter.table_dict_minimum_similarity = 30
-        formatter.table_list_minimum_similarity = 50
-
-        line_ending = "\r\n" if args.crlf else "\n"
+        line_ending = "\r\n" if args.json_eol_style == EolStyle.CRLF else "\n"
 
         in_files = args.json
         out_files = args.output
 
         if out_files is None:
             for fh in args.json:
-                obj = json.load(fh)
-                json_string = formatter.serialize(obj)
-                print(json_string, end=line_ending)
+                json_input = fh.read()
+                output_json = formatter.reformat(json_input)
+                print(output_json, end=line_ending)
             return
 
         if len(in_files) != len(out_files):
             die("the numbers of input and output file names do not match")
 
-        for fn_in, fn_out in zip(args.json, args.output):
-            obj = json.load(fn_in)
-            json_string = formatter.dump(obj, output_file=fn_out)
+        for fh_in, fn_out in zip(args.json, args.output):
+            json_input = fh_in.read()
+            output_json = formatter.reformat(json_input)
+            with open(fn_out, "w", newline="") as fh_out:
+                fh_out.write(output_json)
 
 
 if __name__ == "__main__":  # pragma: no cover
