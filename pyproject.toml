@@ -60,4 +60,6 @@ target-version = "py311"
 ban-relative-imports = "all"
 
 [tool.ruff.per-file-ignores]
-# "tests/**" = ["PTH123", "PLR2004", "S101", "D100", "D103", "ANN201", "ANN001"]
+"tests/**" = ["PTH123", "PLR2004", "S101", "D100", "D103", "ANN201", "ANN001"]
+"src/fractured_json/generated/**" = ["E501", "D100", "D104"]
+"src/fractured_json/__init__.pyi" = ["ANN401", "PYI035"]
