@@ -1,0 +1,36 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "env": {
+                "PYDEVD_DISABLE_FILE_VALIDATION": "1",
+                "PYTEST_ADDOPTS": "--no-cov",
+                "PYTHONNET_RUNTIME": "coreclr",
+            },
+            "justMyCode": true
+        },
+        {
+            "name": "Debug CLI",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "src/fractured_json/_fractured_json.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYDEVD_DISABLE_FILE_VALIDATION": "1",
+                "PYTEST_ADDOPTS": "--no-cov",
+                "PYTHONNET_RUNTIME": "coreclr",
+            },
+            "justMyCode": true,
+            "args": [
+                "--help",
+            ]
+        }    ]
+}

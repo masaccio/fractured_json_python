@@ -1,0 +1,39 @@
+[project]
+classifiers = [ "Programming Language :: Python :: 3", "Programming Language :: C", "Operating System :: OS Independent",]
+description = "JSON formatter that produces highly readable but fairly compact output."
+license = "MIT"
+name = "fractured-json"
+readme = "README.md"
+requires-python = ">=3.11, <3.14"
+version = "4.1.1"
+dependencies = [
+ "wcwidth>=0.2.8",
+ "setuptools>=69.0.3",
+ "pythonnet>=3.0.5",
+ "toml>=0.10.2",
+ "importlib>=1.0.4",
+]
+[[project.authors]]
+name = "Jon Connell"
+email = "python@figsandfudge.com"
+
+[dependency-groups]
+dev = [ "black", "pytest-console-scripts", "pytest-cov", "ruff",]
+
+[build-system]
+requires = [ "setuptools>=68", "wheel",]
+build-backend = "setuptools.build_meta"
+
+[project.urls]
+repository = "https://github.com/masaccio/fractured-json"
+documentation = "https://github.com/masaccio/fractured-json/blob/main/README.md"
+
+[project.scripts]
+fractured-json = "fractured_json._fractured_json:main"
+
+[tool.setuptools]
+packages = [ "fractured_json",]
+include-package-data = true
+
+[tool.setuptools.package-dir]
+"" = "src"
