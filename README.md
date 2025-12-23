@@ -7,7 +7,7 @@
 
 `fractured-json` is primarily a python wrapper of of [FracturedJson](https://github.com/j-brooke/FracturedJson) by [j-brooke](https://github.com/j-brooke).
 
-There is a pure Python implementation of a JSON compactor called (`compact-json`)[https://github.com/masaccio/compact-json] however this is unlikely to get maintenance beyond critical bugfixes.
+There is a pure Python implementation of a JSON compactor called [`compact-json`](https://github.com/masaccio/compact-json) however this is unlikely to get maintenance beyond critical bugfixes.
 
 ## Plans
 
