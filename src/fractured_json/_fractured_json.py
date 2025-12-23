@@ -1,34 +1,12 @@
-import argparse
+import argparse  # noqa: I001
 import logging
 import sys
 
-from fractured_json import EolStyle, Formatter, FracturedJsonOptions, _get_version
+from fractured_json import EolStyle, Formatter, FracturedJsonOptions
+from fractured_json import _get_version, to_snake_case  # pyright: ignore[reportAttributeAccessIssue]
+from fractured_json.generated.option_descriptions import FLAG_DESCRIPTIONS
 
 logger = logging.getLogger(__name__)
-
-FLAG_DESCRIPTIONS = {
-    "max_total_line_length": "Maximum length of a line, including indentation and everything, for purposes of deciding how much to pile together.",
-    "max_inline_length": "Like MaxTotalLineLength, this is used to limit how much gets put onto one line. But this one doesn't count indentation. You might use this instead of MaxTotalLineLength if you want to be sure that similar structures at different depths are formatted the same.",
-    "max_inline_complexity": "The maximum nesting level that can be displayed on a single line. A primitive type or an empty array or object has a complexity of 0. An object or array has a complexity of 1 greater than its most complex child.",
-    "max_compact_array_complexity": "Maximum nesting level that can be arranged spanning multiple lines, with multiple items per line.",
-    "max_table_row_complexity": "Maximum nesting level allowed as a row of a table-formatted array/object.",
-    "table_comma_placement": "Where to place commas in table-formatted elements.",
-    "min_compact_array_row_items": "Minimum number of items per line to be eligible for compact-multiline-array formatting. (This isn't exact - some data sets could confuse the evaluation.)",
-    "always_expand_depth": "Forces elements close to the root to always fully expand, regardless of other settings.",
-    "indent_spaces": "Indents by this number of spaces for each level of depth. (Ignored if UseTabToIndent=true.)",
-    "use_tab_to_indent": "If true, a single tab character is used to indent, instead of spaces.",
-    "simple_bracket_padding": "If true, a space is added between an array/object's brackets and its contents, if that array/object has a complexity of 1. That is, if it only contains primitive elements and/or empty arrays/objects.",
-    "nested_bracket_padding": "If true, a space is added between an array/object's brackets and its contents, if that array/object has a complexity of 2 or more. That is, if it contains non-empty arrays/objects.",
-    "colon_padding": "If true, a space is added after a colon.",
-    "comma_padding": "If true, a space is added after a comma.",
-    "comment_padding": "If true, a space is added between a prefix/postfix comment and the element to which it is attached.",
-    "omit_trailing_whitespace": "If true, the generated JSON text won't have spaces at the ends of lines. If OmitTrailingWhitespace is false and CommaPadding is true, often lines will end in a space. (There are a few other cases where it can happen too.) Defaults to false in the .NET and JavaScript libraries for sake of backward compatibility.",
-    "json_eol_style": "Determines which sort of line endings to use.",
-    "number_list_alignment": "Controls how lists or table columns that contain only numbers and nulls are aligned.",
-    "comment_policy": "Determines how comments should be handled. The JSON standard doesn't allow comments, but as an unofficial extension they are fairly wide-spread and useful.",
-    "allow_trailing_commas": "If true, the final element in an array or object in the input may have a comma after it; otherwise an exception is thrown. The JSON standard doesn't allow trailing commas, but some other tools allow them, so the option is provided for interoperability with them.",
-    "prefix_string": "A string to be included at the start of every line of output. Note that if this string is anything other than whitespace, it will probably make the output invalid as JSON.",
-}
 
 
 def command_line_parser() -> argparse.ArgumentParser:
@@ -49,6 +27,7 @@ def command_line_parser() -> argparse.ArgumentParser:
         default = default_options.get(name)
         help = FLAG_DESCRIPTIONS.get(name, "")
         if info["is_enum"]:
+            default = to_snake_case(str(default), upper=True)
             parser.add_argument(
                 f"--{name.replace('_', '-')}",
                 type=str,
@@ -94,7 +73,7 @@ def command_line_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main() -> None:  # noqa: C901, PLR0915, PLR0912
+def main() -> None:
     parser = command_line_parser()
 
     def die(message: str) -> None:
