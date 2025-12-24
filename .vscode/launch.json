@@ -5,15 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debugger: Current File",
+            "name": "Debug Build Script",
             "type": "debugpy",
             "request": "launch",
-            "program": "${file}",
+            "program": "src/build/build_binaries.py",
             "console": "integratedTerminal",
             "env": {
-                "PYDEVD_DISABLE_FILE_VALIDATION": "1",
                 "PYTEST_ADDOPTS": "--no-cov",
-                "PYTHONNET_RUNTIME": "coreclr",
             },
             "justMyCode": true
         },
