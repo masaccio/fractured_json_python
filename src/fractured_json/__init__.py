@@ -145,7 +145,7 @@ class TableCommaPlacement(NativeEnum, native_type=TableCommaPlacementType):
 class FracturedJsonOptions:
     """FracturedJson.FracturedJsonOptions wrapper."""
 
-    def __init__(self, **kwargs: Any) -> None:
+    def __init__(self, **kwargs: dict[str, int | str | NativeEnum]) -> None:
         """Initialize FracturedJsonOptions with optional keyword arguments."""
         self._dotnet_instance = Activator.CreateInstance(FracturedJsonOptionsType)
         self._properties: dict[str, dict[str, Any]] = {}
