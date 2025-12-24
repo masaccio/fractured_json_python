@@ -1,65 +1,48 @@
 [project]
 classifiers = [ "Programming Language :: Python :: 3", "Programming Language :: C", "Operating System :: OS Independent",]
+dependencies = [ "wcwidth>=0.2.8", "setuptools>=69.0.3", "pythonnet>=3.0.5", "importlib>=1.0.4",]
 description = "JSON formatter that produces highly readable but fairly compact output."
 license = "MIT"
 name = "fractured-json"
 readme = "README.md"
 requires-python = ">=3.11, <3.14"
-version = "4.1.1"
-dependencies = [
- "wcwidth>=0.2.8",
- "setuptools>=69.0.3",
- "pythonnet>=3.0.5",
- "importlib>=1.0.4",
-]
+version = "5.0.0"
 [[project.authors]]
-name = "Jon Connell"
 email = "python@figsandfudge.com"
+name = "Jon Connell"
 
 [dependency-groups]
-dev = [
- "pytest-console-scripts",
- "pytest-cov",
- "toml>=0.10.2",
- "requests>=2.32.5",
- "ruff",
- "beautifulsoup4>=4.14.3",
-]
+dev = [ "pytest-console-scripts", "pytest-cov", "toml>=0.10.2", "requests>=2.32.5", "ruff", "beautifulsoup4>=4.14.3",]
 
 [build-system]
-requires = [ "setuptools>=68", "wheel",]
 build-backend = "setuptools.build_meta"
+requires = [ "setuptools>=68", "wheel",]
 
 [project.urls]
-repository = "https://github.com/masaccio/fractured-json"
 documentation = "https://github.com/masaccio/fractured-json/blob/main/README.md"
+repository = "https://github.com/masaccio/fractured-json"
 
 [project.scripts]
 fractured-json = "fractured_json._fractured_json:main"
 
 [tool.setuptools]
-packages = [ "fractured_json",]
 include-package-data = true
-
-[tool.setuptools.package-dir]
-"" = "src"
+packages = [ "fractured_json",]
 
 [tool.ruff]
 fix = true
-ignore = [
-    "T201", # print() is allowed
-    # "FBT001",
-    # "FBT003",
-    # "PTH123",
-]
+ignore = [ "T201",]
 line-length = 100
-select = ["ALL"]
+select = [ "ALL",]
 target-version = "py311"
+
+[tool.setuptools.package-dir]
+"" = "src"
 
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"
 
 [tool.ruff.per-file-ignores]
-"tests/**" = ["PTH123", "PLR2004", "S101", "D100", "D103", "ANN201", "ANN001"]
-"src/fractured_json/generated/**" = ["E501", "D100", "D104"]
-"src/fractured_json/__init__.pyi" = ["ANN401", "PYI035"]
+"src/fractured_json/__init__.pyi" = [ "ANN401", "PYI035",]
+"src/fractured_json/generated/**" = [ "E501", "D100", "D104",]
+"tests/**" = [ "PTH123", "PLR2004", "S101", "D100", "D103", "ANN201", "ANN001",]
