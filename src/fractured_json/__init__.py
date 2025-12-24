@@ -240,13 +240,10 @@ class Formatter:
 
     def __init__(self, options: FracturedJsonOptions | None = None) -> None:
         """Create a new Formatter wrapper; optionally set `options`."""
-        if options is None:
-            self._dotnet_instance = Activator.CreateInstance(FormatterType)
-        else:
-            self._dotnet_instance = Activator.CreateInstance(
-                FormatterType,
-                options._dotnet_instance,  # noqa: SLF001
-            )
+        self._dotnet_instance = Activator.CreateInstance(FormatterType)
+        if options is not None:
+            options_property = FormatterType.GetProperty("Options")
+            options_property.SetValue(self._dotnet_instance, options._dotnet_instance)  # noqa: SLF001
 
     def reformat(self, json_text: str) -> str:
         """Reformat a JSON string and return the formatted result."""
