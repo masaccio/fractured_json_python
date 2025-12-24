@@ -30,5 +30,19 @@
             "args": [
                 "--help",
             ]
-        }    ]
+        },
+        {
+            "name": "Debug pytest with test file",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "tests/test_formatter.py",
+                "--test-file=tests/data/test-fj-issue-36.ref-1.json",
+                "--test-verbose"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
 }
