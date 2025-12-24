@@ -1,0 +1,7 @@
+@number_list_alignment=LEFT
+@simple_bracket_padding=True
+@max_inline_complexity=1
+[
+    { "x": 0.0, "y": 4  },
+    { "x": 1.0, "y": 19 }
+]

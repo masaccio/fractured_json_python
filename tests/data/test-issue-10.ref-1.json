@@ -1,0 +1,9 @@
+@table_comma_placement=AFTER_PADDING
+@number_list_alignment=DECIMAL
+@simple_bracket_padding=True
+@always_expand_depth=0
+[
+    { "a": 2  , "b": 3  , "c": "4", "d": "5" },
+    { "a": 2.1, "b": "3", "c": 4  , "d": "5" },
+    { "a": 2  , "b": "3", "c": 4.2, "d": "5" }
+]

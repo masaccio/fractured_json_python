@@ -1,0 +1,13 @@
+@max_total_line_length=50
+@max_inline_complexity=2
+@max_compact_array_complexity=1
+@indent_spaces=4
+@simple_bracket_padding=True
+[
+    "seq",
+    [
+        "if",
+        [ "=", "i", [ "prop", "length", "l" ] ],
+        [ "return", "l" ]
+    ]
+]

@@ -1,0 +1,9 @@
+@max_total_line_length=120
+@east_asian_chars=True
+{
+    "Thai"                    : { "Abkhazia": "อับฮาเซีย", "Afghanistan": "อัฟกานิสถาน"  , "Albania": "แอลเบเนีย"  },
+    "Lao"                     : {                        "Afghanistan": "ອັຟການິດສະຖານ"                         },
+    "Uyghur"                  : {                                                      "Albania": "ئالبانىيە" },
+    "Hindi, Marathi, Sanskrit": {                                                      "Albania": "अल्बानिया"     },
+    "Western Armenian"        : {                                                      "Albania": "Ալբանիա"   }
+}
