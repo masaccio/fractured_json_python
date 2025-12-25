@@ -7,8 +7,39 @@ jobs:
       OS: ubuntu-latest
       PYTHON: '3.11'
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo with submodules
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+          persist-credentials: true
+          token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Sync and update FracturedJson submodule to tip of main
+        run: |
+          set -euo pipefail
+          # Ensure .gitmodules remotes are in sync and initialize submodules
+          git submodule sync --recursive
+          git submodule update --init --recursive
+
+          # Force FracturedJson to origin/main (robust for shallow clones)
+          if [ -d "FracturedJson" ]; then
+            pushd FracturedJson
+            git fetch --no-tags origin main
+            if git rev-parse --verify origin/main >/dev/null 2>&1; then
+              git checkout -B main origin/main
+              git reset --hard origin/main
+            else
+              echo "ERROR: origin/main not found for FracturedJson"
+              git show-ref || true
+              exit 1
+            fi
+            popd
+          else
+            echo "ERROR: FracturedJson directory not found after init"
+            exit 1
+          fi
+    
       - name: Install uv and set the python version
         uses: astral-sh/setup-uv@v5
         with:
