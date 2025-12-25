@@ -1,22 +1,43 @@
 [project]
 classifiers = [ "Programming Language :: Python :: 3", "Programming Language :: C", "Operating System :: OS Independent",]
-dependencies = [ "wcwidth>=0.2.8", "setuptools>=69.0.3", "pythonnet>=3.0.5", "importlib>=1.0.4",]
+dependencies = [
+ "wcwidth>=0.2.8",
+ "pythonnet>=3.0.5",
+ "hatchling>=1.28.0",
+]
 description = "JSON formatter that produces highly readable but fairly compact output."
 license = "MIT"
 name = "fractured-json"
 readme = "README.md"
 requires-python = ">=3.11, <3.14"
-version = "5.0.0"
+dynamic = ["version"]
+
 [[project.authors]]
 email = "python@figsandfudge.com"
 name = "Jon Connell"
 
 [dependency-groups]
-dev = [ "pytest-console-scripts", "pytest-cov", "toml>=0.10.2", "requests>=2.32.5", "ruff", "beautifulsoup4>=4.14.3", "pytest-check>=2.6.2",]
+dev = [
+ "pytest-console-scripts",
+ "pytest-cov",
+ "requests>=2.32.5",
+ "ruff",
+ "beautifulsoup4>=4.14.3",
+ "pytest-check>=2.6.2",
+]
 
 [build-system]
-build-backend = "setuptools.build_meta"
-requires = [ "setuptools>=68", "wheel",]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.sdist]
+include = ["/src/fractured_json"]
+
+[tool.hatch.build]
+artifacts = ["src/fractured_json/_version.py"]
+
+[tool.hatch.version]
+path = "src/fractured_json/_version.py"
 
 [project.urls]
 documentation = "https://github.com/masaccio/fractured-json/blob/main/README.md"
@@ -24,10 +45,6 @@ repository = "https://github.com/masaccio/fractured-json"
 
 [project.scripts]
 fractured-json = "fractured_json._fractured_json:main"
-
-[tool.setuptools]
-include-package-data = true
-packages = [ "fractured_json",]
 
 [tool.ruff]
 fix = true
