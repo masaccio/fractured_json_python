@@ -1,6 +1,7 @@
 import re
 from pathlib import Path
 
+import pytest
 import pytest_check as check
 from wcwidth import wcswidth
 
@@ -30,6 +31,38 @@ def test_clr_load():
     formatter = Formatter(options=options)
 
     test_output = formatter.reformat(test_input)
+    assert test_output == ref_output
+
+
+def test_all_args():
+    options = FracturedJsonOptions(
+        allow_trailing_commas=True,
+        always_expand_depth=2,
+        colon_before_prop_name_padding=True,
+        colon_padding=True,
+        comma_padding=True,
+        comment_padding=True,
+        comment_policy="PRESERVE",
+        indent_spaces=2,
+        json_eol_style="LF",
+        max_compact_array_complexity=2,
+        max_inline_complexity=2,
+        max_prop_name_padding=2,
+        max_table_row_complexity=2,
+        max_total_line_length=100,
+        min_compact_array_row_items=2,
+        nested_bracket_padding=True,
+        number_list_alignment="LEFT",
+        prefix_string="::",
+        preserve_blank_lines=True,
+        simple_bracket_padding=True,
+        table_comma_placement="BEFORE_PADDING_EXCEPT_NUMBERS",
+        use_tab_to_indent=True,
+    )
+    formatter = Formatter(options=options)
+    test_input = Path("tests/data/test-comments-0.jsonc").read_text()
+    test_output = formatter.reformat(test_input)
+    ref_output = Path("tests/data/test-comments-0.ref-1.jsonc").read_text()
     assert test_output == ref_output
 
 
@@ -72,8 +105,13 @@ def test_json(pytestconfig):  # noqa: PLR0912, C901
                     if line.startswith("@"):
                         (param, value) = re.split(r"\s*=\s*", line[1:])
                         value = value.strip()
-                        if param == "east_asian_chars":
-                            east_asian_chars = bool(value)
+                        if value.lower() in ["true", "false"]:
+                            if param == "east_asian_chars":
+                                east_asian_chars = bool(value)
+                            else:
+                                test_options[param] = bool(value)
+                        elif value.isnumeric():
+                            test_options[param] = int(value)
                         else:
                             test_options[param] = value
                     else:
@@ -101,3 +139,32 @@ def test_json(pytestconfig):  # noqa: PLR0912, C901
                 print("=====")
 
             check.equal(test_output, ref_json, f"Mismatch in {source_filename} with {ref_filename}")
+
+
+def test_exceptions():
+    with pytest.raises(KeyError, match="Unknown option 'non_existent_option'"):
+        _ = FracturedJsonOptions(non_existent_option=True)
+
+    with pytest.raises(
+        ValueError,
+        match="Invalid value 'INVALID' for option table_comma_placement",
+    ):
+        _ = FracturedJsonOptions(table_comma_placement="INVALID")
+
+    with pytest.raises(
+        ValueError,
+        match="Invalid value 'INVALID' for option max_total_line_length",
+    ):
+        _ = FracturedJsonOptions(max_total_line_length="INVALID")
+
+    with pytest.raises(
+        ValueError,
+        match="Invalid value '5' for option colon_padding",
+    ):
+        _ = FracturedJsonOptions(colon_padding=5)
+
+    with pytest.raises(
+        ValueError,
+        match=r"Invalid value 'EolStyle\.CRLF' for option comment_policy",
+    ):
+        _ = FracturedJsonOptions(comment_policy=EolStyle.CRLF)
