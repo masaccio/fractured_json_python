@@ -63,6 +63,14 @@ def test_all_args():
     assert test_output == ref_output
 
 
+def test_minify():
+    json_input = Path("tests/data/test-wide-chars.json").read_text()
+    ref_output = Path("tests/data/test-wide-chars.ref-2.json").read_text()
+    formatter = Formatter()
+    test_output = formatter.minify(json_input)
+    assert test_output == ref_output
+
+
 def test_exceptions():
     with pytest.raises(KeyError, match="Unknown option 'non_existent_option'"):
         _ = FracturedJsonOptions(non_existent_option=True)
