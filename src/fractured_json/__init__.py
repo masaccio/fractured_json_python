@@ -1,4 +1,3 @@
-import importlib.metadata
 import os
 import re
 from collections.abc import Callable
@@ -6,20 +5,7 @@ from pathlib import Path
 
 from pythonnet import load
 
-__version__ = importlib.metadata.version("fractured-json")
-
-
-def _get_version() -> str:
-    return __version__
-
-
-__all__ = [
-    "CommentPolicy",
-    "EolStyle",
-    "Formatter",
-    "FracturedJsonOptions",
-    "TableCommaPlacement",
-]
+from fractured_json._version import __version__  # noqa: F401
 
 
 def pythonnet_runtime() -> str:
@@ -80,7 +66,6 @@ class NativeEnum:
     """Generic base class that dynamically maps .NET enums to Pythonic attributes."""
 
     _native_type = None
-    _native_map = None
 
     def __init_subclass__(
         cls,
@@ -88,9 +73,10 @@ class NativeEnum:
         **kwargs: dict[str, bool | int | str],
     ) -> None:
         super().__init_subclass__(**kwargs)
-        if native_type is None:
-            msg = f"{cls.__name__} must set _native_type"
-            raise ValueError(msg)
+
+        # If class is dynamically constructed using type()
+        if hasattr(cls, "_native_type") and cls._native_type is not None:
+            native_type = cls._native_type
 
         native_names = [
             str(x)
@@ -116,11 +102,11 @@ class NativeEnum:
         return self._py_name
 
     @property
-    def value(self) -> str:
+    def value(self) -> int:
         """The integer value of the enum."""
         return self._py_value
 
-    def __init__(self, py_name: str, native_value: str) -> None:
+    def __init__(self, py_name: str, native_value: int) -> None:
         self._py_name = py_name
         self._py_value = native_value
 
@@ -139,25 +125,15 @@ class NativeEnum:
 types = get_object_types()
 FormatterType = types["Formatter"]
 FracturedJsonOptionsType = types["FracturedJsonOptions"]
-CommentPolicyType = types["CommentPolicy"]
-EolStyleType = types["EolStyle"]
-TableCommaPlacementType = types["TableCommaPlacement"]
 
-
-def allowed_enum_values(enum_type: str) -> list[str]:
-    return [str(x) for x in types[enum_type].GetEnumNames()]
-
-
-class CommentPolicy(NativeEnum, native_type=CommentPolicyType):
-    """FracturedJson.CommentPolicy wrapper."""
-
-
-class EolStyle(NativeEnum, native_type=EolStyleType):
-    """FracturedJson.EolStyle wrapper."""
-
-
-class TableCommaPlacement(NativeEnum, native_type=TableCommaPlacementType):
-    """FracturedJson.TableCommaPlacement wrapper."""
+__all__ = [
+    "Formatter",
+    "FracturedJsonOptions",
+]
+for enum_name in [x.Name for x in types.values() if x.IsEnum]:
+    enum_type = type(enum_name, (NativeEnum,), {"_native_type": types[enum_name]})
+    globals()[enum_name] = enum_type
+    __all__.append(enum_type)  # noqa: PYI056
 
 
 class FracturedJsonOptions:
@@ -203,7 +179,12 @@ class FracturedJsonOptions:
     def get(self, name: str) -> int | bool | str | NativeEnum:
         """Getter for an option that calls the .NET class."""
         prop = self._properties[name]["prop"]
-        return prop.GetValue(self._dotnet_instance, None)
+        if self._properties[name]["is_enum"]:
+            native_value = prop.GetValue(self._dotnet_instance)
+            derived_enum = type(prop.Name, (NativeEnum,), {"_native_type": prop.PropertyType})
+            return derived_enum(to_snake_case(str(native_value), upper=True), (int(native_value)))
+
+        return prop.GetValue(self._dotnet_instance)
 
     @staticmethod
     def _to_dotnet_type(

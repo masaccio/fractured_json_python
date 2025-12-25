@@ -1,14 +1,11 @@
 import argparse  # noqa: I001
-import logging
 import sys
 
 from wcwidth import wcswidth
 
-from fractured_json import EolStyle, Formatter, FracturedJsonOptions
-from fractured_json import _get_version, to_snake_case  # pyright: ignore[reportAttributeAccessIssue]
+from fractured_json import Formatter, FracturedJsonOptions
+from fractured_json import __version__ as fractured_json_version  # pyright: ignore[reportAttributeAccessIssue]
 from fractured_json.generated.option_descriptions import FLAG_DESCRIPTIONS
-
-logger = logging.getLogger(__name__)
 
 
 def command_line_parser() -> argparse.ArgumentParser:
@@ -27,39 +24,38 @@ def command_line_parser() -> argparse.ArgumentParser:
     default_options = FracturedJsonOptions()
     for name, info in sorted(default_options.list_options().items()):
         default = default_options.get(name)
-        help = FLAG_DESCRIPTIONS.get(name, "")
+        desc = FLAG_DESCRIPTIONS.get(name, "")
         if info["is_enum"]:
-            default = to_snake_case(str(default), upper=True)
             parser.add_argument(
                 f"--{name.replace('_', '-')}",
                 type=str,
                 choices=info["enum_names"],
-                default=default_options.get(name),
-                help=f"{help} (default={default})",
+                default=default.name,
+                help=f"{desc} (default={default.name})",
             )
         elif isinstance(default, bool):
             parser.add_argument(
                 f"--{name.replace('_', '-')}",
                 action="store_true" if not default else "store_false",
                 default=default,
-                help=f"{help} (default={default})",
+                help=f"{desc} (default={default})",
             )
-        else:
-            # We know this to be an int
+        elif isinstance(default, int):
             parser.add_argument(
                 f"--{name.replace('_', '-')}",
                 metavar="N",
                 type=type(default),
                 default=default_options.get(name),
-                help=f"{help} (default={default})",
+                help=f"{desc} (default={default})",
+            )
+        else:
+            parser.add_argument(
+                f"--{name.replace('_', '-')}",
+                type=type(default),
+                default=default_options.get(name),
+                help=f"{desc} (default={default})",
             )
 
-    parser.add_argument(
-        "--debug",
-        default=False,
-        action="store_true",
-        help="Enable debug logging",
-    )
     parser.add_argument(
         "json",
         nargs="*",
@@ -84,26 +80,16 @@ def main() -> None:
 
     args = parser.parse_args()
     if args.version:
-        print(_get_version())
+        print(fractured_json_version)
     elif len(args.json) == 0:
         parser.print_help()
     else:
-        formatter = Formatter()
-        default_options = FracturedJsonOptions()
-        for name in default_options.list_options():
-            setattr(formatter, name, getattr(args, name))
+        options = FracturedJsonOptions()
+        for name in options.list_options():
+            setattr(options, name, getattr(args, name))
+        formatter = Formatter(options=options)
         if args.east_asian_chars:
             formatter.string_length_func = lambda s: wcswidth(s)
-
-        hdlr = logging.StreamHandler()
-        hdlr.setFormatter(logging.Formatter("%(levelname)s:%(name)s:%(message)s"))
-        logger.addHandler(hdlr)
-        if args.debug:
-            logger.setLevel("DEBUG")
-        else:
-            logger.setLevel("ERROR")
-
-        line_ending = "\r\n" if args.json_eol_style == EolStyle.CRLF else "\n"
 
         in_files = args.json
         out_files = args.output
@@ -112,13 +98,13 @@ def main() -> None:
             for fh in args.json:
                 json_input = fh.read()
                 output_json = formatter.reformat(json_input)
-                print(output_json, end=line_ending)
+                print(output_json, end="")
             return
 
         if len(in_files) != len(out_files):
             die("the numbers of input and output file names do not match")
 
-        for fh_in, fn_out in zip(args.json, args.output):
+        for fh_in, fn_out in zip(args.json, args.output, strict=True):
             json_input = fh_in.read()
             output_json = formatter.reformat(json_input)
             with open(fn_out, "w", newline="") as fh_out:
