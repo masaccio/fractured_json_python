@@ -27,7 +27,7 @@ src/*.egg-info
 
 # Build artifacts
 src/fractured_json/FracturedJson.dll
-build
+/build/
 tests/bin
 
 # Local
