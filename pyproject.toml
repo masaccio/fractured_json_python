@@ -36,6 +36,10 @@ line-length = 100
 select = [ "ALL",]
 target-version = "py311"
 
+[tool.tox]
+requires = [ "tox>=4.0",]
+envlist = [ "py39", "py310", "py311", "py312", "py313",]
+
 [tool.setuptools.package-dir]
 "" = "src"
 
@@ -46,3 +50,14 @@ ban-relative-imports = "all"
 "src/fractured_json/__init__.pyi" = [ "ANN401", "PYI035",]
 "src/fractured_json/generated/**" = [ "E501", "D100", "D104",]
 "tests/**" = [ "PTH123", "PLR2004", "S101", "D100", "D103", "ANN201", "ANN001",]
+
+[tool.coverage.run]
+branch = true
+omit = [ "src/fractured_json/generated/*.py",]
+
+[tool.coverage.html]
+directory = "coverage_html_report"
+show_contexts = true
+
+[tool.pytest.ini_options]
+addopts = "--cov=src/fractured_json --cov-report=html --cov-report=term-missing:skip-covered --cov-context=test"
