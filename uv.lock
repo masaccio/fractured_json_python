@@ -258,7 +258,7 @@ wheels = [
 
 [[package]]
 name = "fractured-json"
-version = "5.0.0.post1"
+version = "5.0.0.post2"
 source = { editable = "." }
 dependencies = [
     { name = "pythonnet" },

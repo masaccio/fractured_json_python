@@ -16,7 +16,7 @@ license = "MIT"
 name = "fractured-json"
 readme = "README.md"
 requires-python = ">=3.11, <3.14"
-version = "5.0.0.post1"
+version = "5.0.0.post2"
 
 [[project.authors]]
 email = "python@figsandfudge.com"

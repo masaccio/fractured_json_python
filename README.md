@@ -25,7 +25,7 @@ The [FracturedJson Wiki](https://github.com/j-brooke/FracturedJson/wiki) provide
 
 The package installs a command-line script `fractured-json` which can compact one or more JSON files according to command-line switches.
 
-```bash
+``` text
 usage: fractured-json [-h] [-V] [--output OUTPUT]
                       [--allow-trailing-commas] [--always-expand-depth N]
                       [--colon-before-prop-name-padding] [--colon-padding]

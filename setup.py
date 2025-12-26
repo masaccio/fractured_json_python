@@ -76,6 +76,4 @@ setup(
     cmdclass={
         "build_py": build_py,
     },
-    # Force platform-specific wheels
-    # has_ext_modules=lambda: True,
 )
