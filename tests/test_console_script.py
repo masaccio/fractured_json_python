@@ -1,5 +1,7 @@
 import re
+from io import StringIO
 from pathlib import Path
+from shutil import copy
 
 import pytest
 
@@ -139,6 +141,28 @@ def test_output(script_runner, tmp_path):
     assert tmp_file.read_text() == '{ "bools": {"true": true, "false": false} }\n'
 
 
+def test_in_place(script_runner, tmp_path):
+    tmp_file = tmp_path / "test.json"
+    copy(Path("tests/data/test-bool.json"), tmp_file)
+    ret = script_runner.run(
+        ["fractured-json", "--in-place", tmp_file],
+    )
+    assert ret.stderr == ""
+    assert ret.success
+    assert tmp_file.read_text() == '{ "bools": {"true": true, "false": false} }\n'
+
+    timestamp = tmp_file.stat().st_mtime_ns
+
+    ret = script_runner.run(
+        ["fractured-json", "--in-place", tmp_file],
+    )
+    assert ret.stderr == ""
+    assert ret.success
+    assert tmp_file.read_text() == '{ "bools": {"true": true, "false": false} }\n'
+
+    assert timestamp == tmp_file.stat().st_mtime_ns
+
+
 def test_output_mismatched_number_of_files(script_runner):
     ret = script_runner.run(
         [
@@ -152,3 +176,22 @@ def test_output_mismatched_number_of_files(script_runner):
     )
     assert ret.stderr == "fractured-json: the numbers of input and output file names do not match\n"
     assert ret.returncode == 1
+
+
+def test_pipe_stdin(script_runner):
+    json_input_fh = StringIO(Path("tests/data/test-bool.json").read_text())
+    ret = script_runner.run(["fractured-json", "-"], stdin=json_input_fh)
+    assert ret.success
+    assert ret.stderr == ""
+    assert ret.success
+    assert ret.stdout == '{ "bools": {"true": true, "false": false} }\n'
+
+
+def test_missing_file(script_runner, tmp_path):
+    tmp_file = tmp_path / "test.json"
+    ret = script_runner.run(
+        ["fractured-json", "file-does-not-exist.json"],
+    )
+    assert not ret.success
+    assert "[Errno 2] No such file or directory: 'file-does-not-exist.json'" in ret.stderr
+    assert ret.stdout == ""
