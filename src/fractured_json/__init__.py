@@ -137,20 +137,7 @@ for enum_name in [x.Name for x in types.values() if x.IsEnum]:
 
 
 class FracturedJsonOptions:
-    """Configuration container for FracturedJson formatting options.
-
-    This class is a lightweight Python wrapper around the underlying
-    .NET ``FracturedJson.FracturedJsonOptions`` type. Individual options
-    are exposed as attributes (for example ``max_total_line_length``,
-    ``indent_spaces``, ``comment_policy``). Options can be queried and
-    set through attribute access or via the dynamic API methods
-    :py:meth:`list_options`, :py:meth:`get` and :py:meth:`set`.
-
-    The mapping of Python attribute names to the underlying .NET
-    properties follows snake_case conversion of the .NET property
-    names. Enum-valued options are exposed as members of dynamically
-    generated enum wrapper classes.
-    """
+    """Configuration container for FracturedJson formatting options."""
 
     def __init__(self, **kwargs: dict[str, int | str | NativeEnum]) -> None:
         """Initialize FracturedJsonOptions with optional keyword arguments."""
@@ -271,33 +258,7 @@ class FracturedJsonOptions:
 
 
 class Formatter:
-    """Formatter wrapper around the FracturedJson .NET formatter.
-
-    The :class:`Formatter` provides convenient Python access to the
-    .NET formatting functionality. Construct with an optional
-    :class:`FracturedJsonOptions` instance to apply non-default
-    formatting behaviour.
-
-    Example:
-    -------
-    >>> opts = FracturedJsonOptions(indent_spaces=4)
-    >>> fmt = Formatter(opts)
-    >>> fmt.reformat('{"a":1}')
-
-    Methods:
-    -------
-    ``reformat``
-        Reformat a JSON string and return the formatted representation.
-
-    ``serialize``
-        Serialize a Python object using the underlying .NET serializer.
-
-    ``string_length_func``
-        A customizable function used by the formatter to measure string
-        lengths (useful for wide-character handling). Assign a callable
-        taking a single ``str`` argument and returning an ``int``.
-
-    """
+    """Formatter wrapper around the FracturedJson .NET formatter."""
 
     def __init__(self, options: FracturedJsonOptions | None = None) -> None:
         """Create a new Formatter wrapper; optionally set `options`."""
