@@ -74,7 +74,7 @@ def test_minify():
 
 
 def test_exceptions():
-    with pytest.raises(KeyError, match="Unknown option 'non_existent_option'"):
+    with pytest.raises(AttributeError, match="Unknown option 'non_existent_option'"):
         _ = FracturedJsonOptions(non_existent_option=True)
 
     with pytest.raises(
@@ -109,6 +109,19 @@ def test_exceptions():
 
     with pytest.raises(TypeError, match="Must be callable"):
         formatter.string_length_func = 123  # type: ignore[assignment]
+
+    options = FracturedJsonOptions()
+    with pytest.raises(
+        AttributeError,
+        match="FracturedJsonOptions has no attribute 'invalid'",
+    ):
+        _ = options.invalid
+
+    with pytest.raises(
+        AttributeError,
+        match="FracturedJsonOptions has no attribute 'invalid'",
+    ):
+        options.invalid = 0
 
 
 def test_dll_missing(path_is_file_fails):  # noqa: ARG001
