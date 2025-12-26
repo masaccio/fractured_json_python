@@ -74,39 +74,6 @@ class NativeEnum:
 
     _native_type = None
 
-    def __init_subclass__(
-        cls,
-        native_type: object | None = None,
-        **kwargs: dict[str, bool | int | str],
-    ) -> None:
-        # Keep behavior for any existing code that relies on subclassing
-        super().__init_subclass__(**kwargs)
-
-        # If class is dynamically constructed using type()
-        if hasattr(cls, "_native_type") and cls._native_type is not None:
-            native_type = cls._native_type
-
-        if native_type is None:
-            return
-
-        native_names = [
-            str(x)
-            for x in native_type.GetEnumNames()  # pyright: ignore[reportAttributeAccessIssue]
-        ]
-        native_values = [
-            int(x)
-            for x in native_type.GetEnumValues()  # pyright: ignore[reportAttributeAccessIssue]
-        ]
-
-        name_to_value = dict(zip(native_names, native_values, strict=True))
-
-        for native_name in native_names:
-            py_name = to_snake_case(native_name, upper=True)
-            native_value = name_to_value[native_name]
-            # Create instance and store on class
-            instance = cls(py_name, native_value)
-            setattr(cls, py_name, instance)
-
     @property
     def name(self) -> str:
         """The string name of the enum value."""
@@ -134,11 +101,6 @@ class NativeEnum:
 
     @classmethod
     def from_dotnet_type(cls, dotnet_type: object) -> type:
-        """Create (or return cached) dynamic NativeEnum subclass for given .NET enum type.
-
-        The returned class exposes each enum member as a class attribute (upper snake case), and
-        provides classmethods `from_value` and `from_name` for lookup along with `names()` and `values()`.
-        """
         key = str(dotnet_type)
         if key in _native_enum_cache:
             return _native_enum_cache[key]
@@ -151,33 +113,34 @@ class NativeEnum:
         native_values = [int(x) for x in dotnet_type.GetEnumValues()]
 
         name_to_value: dict[str, int] = {}
-        value_to_member: dict[int, "NativeEnum"] = {}
+        value_to_member: dict[int, NativeEnum] = {}
 
-        for n, v in zip(native_names, native_values):
+        for n, v in zip(native_names, native_values, strict=False):
             py_name = to_snake_case(n, upper=True)
             inst = new_cls(py_name, v)
             setattr(new_cls, py_name, inst)
             name_to_value[py_name] = v
             value_to_member[v] = inst
 
-        # Attach lookup helpers
-        def from_value(cls2, value: int) -> "NativeEnum":
+        def from_value(cls2: type, value: int) -> "NativeEnum":
             try:
                 return value_to_member[int(value)]
             except Exception as e:
-                raise ValueError(f"{value} is not a valid value for {cls2.__name__}") from e
+                msg = f"{value} is not a valid value for {cls2.__name__}"
+                raise ValueError(msg) from e
 
-        def from_name(cls2, name: str) -> "NativeEnum":
+        def from_name(cls2: type, name: str) -> "NativeEnum":
             py_name = to_snake_case(name, upper=True)
             try:
                 return getattr(cls2, py_name)
             except Exception as e:
-                raise ValueError(f"{name} is not a valid name for {cls2.__name__}") from e
+                msg = f"{name} is not a valid name for {cls2.__name__}"
+                raise ValueError(msg) from e
 
-        def names_fn(cls2) -> list[str]:
+        def names_fn(_cls: type) -> list[str]:
             return list(name_to_value.keys())
 
-        def values_fn(cls2) -> list[int]:
+        def values_fn(_cls: type) -> list[int]:
             return list(value_to_member.keys())
 
         new_cls.from_value = classmethod(from_value)
@@ -187,6 +150,7 @@ class NativeEnum:
 
         _native_enum_cache[key] = new_cls
         return new_cls
+
 
 types = get_object_types()
 FormatterType = types["Formatter"]
@@ -209,13 +173,8 @@ class FracturedJsonOptions:
         """Initialize FracturedJsonOptions with optional keyword arguments."""
         self._dotnet_instance = Activator.CreateInstance(FracturedJsonOptionsType)
         self._properties: dict[str, dict[str, object | str | list | bool]] = {}
-        self._get_dotnet_props()
 
-        for key, value in kwargs.items():
-            self.set(key, value)
-
-    def _get_dotnet_props(self) -> None:
-        """Dynamically populate the list of available options through .NET reflection."""
+        # Dynamically populate the list of available options through .NET reflection.
         t = Type.GetType(self._dotnet_instance.GetType().AssemblyQualifiedName)
         props = t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
         for prop in props:
@@ -237,6 +196,9 @@ class FracturedJsonOptions:
                 "is_enum": bool(prop.PropertyType.IsEnum),
                 "enum_names": enum_names,
             }
+
+        for key, value in kwargs.items():
+            self.set(key, value)
 
     def list_options(self) -> dict[str, dict[str, object | str | list | bool]]:
         """Return a dictionary of available options and their metadata."""
