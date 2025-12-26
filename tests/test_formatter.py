@@ -142,3 +142,26 @@ def test_string_length_property():
     getter = formatter.string_length_func
     assert callable(getter)
     assert getter("abc") == 6
+
+
+def test_formatter_options():
+    opts = FracturedJsonOptions(
+        max_total_line_length=80,
+        indent_spaces=3,
+        comment_policy="REMOVE",
+        table_comma_placement="BEFORE_PADDING_EXCEPT_NUMBERS",
+        number_list_alignment="LEFT",
+        prefix_string="::",
+        use_tab_to_indent=False,
+    )
+
+    formatter = Formatter()
+    formatter.options = opts
+
+    got = formatter.options
+    assert got.max_total_line_length == 80
+    assert got.indent_spaces == 3
+    assert got.comment_policy.name == "REMOVE"
+
+    got.max_total_line_length = 100
+    assert got.max_total_line_length == 100
