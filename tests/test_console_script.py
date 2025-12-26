@@ -31,6 +31,14 @@ def test_no_args(script_runner):
     assert ret.stderr == ""
 
 
+def test_question_mark(script_runner):
+    ret = script_runner.run(["fractured-json", "-?"], print_result=False)
+    assert ret.success
+    assert "Format JSON into compact, human readable form" in ret.stdout
+    assert "max-total-line-length N" in ret.stdout
+    assert ret.stderr == ""
+
+
 def test_all_args(script_runner, pytestconfig):
     ret = script_runner.run(
         [

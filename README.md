@@ -169,6 +169,8 @@ Multiple files and output files can be processed at once but the number of input
 fractured-json --output new_json_1.json --output new_json_2.json json_1.json json_2.json
 ```
 
+Command-line help is printed when no arguments are passed, with `--help`, ``-h`` or ``-?``.
+
 ## API Usage
 
 Follow the following steps to reformat JSON strings:

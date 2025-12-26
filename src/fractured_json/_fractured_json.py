@@ -68,6 +68,8 @@ def command_line_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Treat strings as unicode East Asian characters",
     )
+    parser.add_argument("-?", dest="dos_help", action="store_true", help=argparse.SUPPRESS)
+
     return parser
 
 
@@ -81,7 +83,7 @@ def main() -> None:
     args = parser.parse_args()
     if args.version:
         print(fractured_json_version)
-    elif len(args.json) == 0:
+    elif len(args.json) == 0 or args.dos_help:
         parser.print_help()
     else:
         options = FracturedJsonOptions()
