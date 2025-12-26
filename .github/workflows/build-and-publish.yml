@@ -65,5 +65,11 @@ jobs:
       - name: Build binary wheel
         run: uv build --wheel
 
+      - name: Relabel Linux wheel for PyPI
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          pip install auditwheel
+          auditwheel repair dist/*.whl -w dist/
+
       - name: Publish to PyPI
         run: uv publish
