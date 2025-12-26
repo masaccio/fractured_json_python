@@ -312,12 +312,12 @@ class Formatter:
         prop = FormatterType.GetProperty("Options")
         prop.SetValue(self._dotnet_instance, value._dotnet_instance)
 
-    def reformat(self, json_text: str) -> str:
+    def reformat(self, json_text: str, starting_depth: int = 0) -> str:
         """Reformat a JSON string and return the formatted result."""
         if not isinstance(json_text, str):
             msg = "json_text must be a str"
             raise TypeError(msg)
-        result = self._dotnet_instance.Reformat(String(json_text))
+        result = self._dotnet_instance.Reformat(String(json_text), Int32(starting_depth))
         return str(result)
 
     def minify(self, json_text: str) -> str:

@@ -73,6 +73,13 @@ def test_minify():
     assert test_output == ref_output
 
 
+def test_depth():
+    json_input = Path("tests/data/test-bool.json").read_text()
+    formatter = Formatter()
+    test_output = formatter.reformat(json_input, 2)
+    assert test_output == '        { "bools": {"true": true, "false": false} }\n'
+
+
 def test_exceptions():
     with pytest.raises(AttributeError, match="Unknown option 'non_existent_option'"):
         _ = FracturedJsonOptions(non_existent_option=True)
