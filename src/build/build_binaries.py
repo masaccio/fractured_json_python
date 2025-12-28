@@ -11,7 +11,7 @@ ROOT_DIR = Path(__file__).parent.parent.parent.absolute()
 BUILD_DIR = ROOT_DIR / "FracturedJson" / "FracturedJsonCli"
 SRC_DIR = ROOT_DIR / "src" / "fractured_json"
 TEST_DIR = ROOT_DIR / "tests" / "bin"
-VERSION_FILE = SRC_DIR / "_version.py"
+PYPROJECT_FILE = ROOT_DIR / "pyproject.toml"
 
 
 def build_binaries() -> None:
@@ -45,11 +45,29 @@ def parse_assets_json() -> tuple[Path, str]:
     return (BUILD_DIR / "bin" / "Release" / framework / "publish", library_version)
 
 
-def create_version_file(version: str) -> None:
-    """Create _version.pywith latest FracturedJson version."""
-    with open(VERSION_FILE, "w") as f:  # noqa: PTH123
-        print('__version__ = "5.0.0"', file=f)
-    print(f"✅ Created _version.py with version {version}")
+def update_version(version: str) -> None:
+    """Update pyproject.toml if FracturedJson version is newer."""
+    new_project_toml = ""
+    patch_version = True
+    for line in PYPROJECT_FILE.read_text().splitlines():
+        if line.startswith("version"):
+            # Expect: version = "5.0.0post5" / version = "5.0.1"
+            toml_version = line.split("=")[1].strip().replace('"', "")
+            patch_version = False
+            if "post" in toml_version:
+                toml_base_version = toml_version.split("post")[0]
+                if toml_base_version != version:
+                    patch_version = True
+            elif toml_version != version:
+                patch_version = True
+            if patch_version:
+                line = f'version = "{version}'
+        new_project_toml += line + "\n"
+    if patch_version:
+        PYPROJECT_FILE.write_text(new_project_toml)
+        print(f"⚠️ Updated pyproject.toml with version {version}")
+    else:
+        print(f"✅ pyproject.toml version {toml_version} matches version {version}")
 
 
 def copy_binary(bin_dir: Path, file: str, target_dir: Path) -> None:
@@ -63,7 +81,7 @@ def main() -> None:
     build_binaries()
 
     bin_dir, version = parse_assets_json()
-    create_version_file(version)
+    update_version(version)
     copy_binary(bin_dir, "FracturedJson.dll", SRC_DIR)
     copy_binary(bin_dir, "Mono.Options.dll", TEST_DIR)
     copy_binary(bin_dir, "FracturedJson.dll", TEST_DIR)
