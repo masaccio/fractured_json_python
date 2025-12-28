@@ -11,8 +11,14 @@ def pytest_addoption(parser):
 
 @pytest.fixture
 def path_is_file_fails(monkeypatch):
-    """Make Path.is_file return False so load_runtime will raise FileNotFoundError."""
+    """Make Path.is_file return False."""
     monkeypatch.setattr(Path, "is_file", lambda self: False)
+
+
+@pytest.fixture
+def path_is_file_succeeds(monkeypatch):
+    """Make Path.is_file return True."""
+    monkeypatch.setattr(Path, "is_file", lambda self: True)
 
 
 @pytest.fixture

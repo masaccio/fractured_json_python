@@ -3,7 +3,7 @@ import sys
 
 from wcwidth import wcswidth
 
-from fractured_json import Formatter, FracturedJsonOptions
+from fractured_json import Formatter, FracturedJsonOptions, object_property_info
 from fractured_json import __version__ as fractured_json_version  # pyright: ignore[reportAttributeAccessIssue]
 from fractured_json.generated.option_descriptions import FLAG_DESCRIPTIONS
 
@@ -48,8 +48,9 @@ def command_line_parser() -> argparse.ArgumentParser:
         "the number of input files.",
     )
     default_options = FracturedJsonOptions()
-    for name, info in sorted(default_options.list_options().items()):
-        default = default_options.get(name)
+    for name, info in object_property_info(default_options).items():
+        # for name, info in sorted(default_options.list_options().items()):
+        default = getattr(default_options, name)
         desc = FLAG_DESCRIPTIONS.get(name, "")
         if info["is_enum"]:
             parser.add_argument(
@@ -71,14 +72,14 @@ def command_line_parser() -> argparse.ArgumentParser:
                 f"--{name.replace('_', '-')}",
                 metavar="N",
                 type=type(default),
-                default=default_options.get(name),
+                default=getattr(default_options, name),
                 help=f"{desc} (default={default})",
             )
         else:
             parser.add_argument(
                 f"--{name.replace('_', '-')}",
                 type=type(default),
-                default=default_options.get(name),
+                default=getattr(default_options, name),
                 help=f"{desc} (default={default})",
             )
 
@@ -111,7 +112,8 @@ def main() -> None:
         parser.print_help()
     else:
         options = FracturedJsonOptions()
-        for name in options.list_options():
+        for name in object_property_info(options):
+            # for name in options.list_options():
             setattr(options, name, getattr(args, name))
         formatter = Formatter(options=options)
         if args.east_asian_chars:

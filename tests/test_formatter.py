@@ -22,10 +22,10 @@ def test_clr_load():
     )
 
     options = FracturedJsonOptions(
+        json_eol_style=EolStyle.CRLF,
         max_total_line_length=120,
         indent_spaces=2,
         max_compact_array_complexity=2,
-        json_eol_style=EolStyle.CRLF,
     )
     formatter = Formatter(options=options)
 
@@ -81,54 +81,49 @@ def test_depth():
 
 
 def test_exceptions():
-    with pytest.raises(AttributeError, match="Unknown option 'non_existent_option'"):
+    with pytest.raises(
+        AttributeError,
+        match="FracturedJsonOptions property 'non_existent_option' does not exist",
+    ):
         _ = FracturedJsonOptions(non_existent_option=True)
 
     with pytest.raises(
         ValueError,
-        match="Invalid value 'INVALID' for option table_comma_placement",
+        match="'INVALID' is not a valid value for TableCommaPlacement",
     ):
         _ = FracturedJsonOptions(table_comma_placement="INVALID")
 
     with pytest.raises(
-        ValueError,
-        match="Invalid value 'INVALID' for option max_total_line_length",
+        TypeError,
+        match="Property max_total_line_length expects int, got str 'INVALID'",
     ):
         _ = FracturedJsonOptions(max_total_line_length="INVALID")
 
     with pytest.raises(
-        ValueError,
-        match="Invalid value '5' for option colon_padding",
+        TypeError,
+        match="Property colon_padding expects bool, got int '5'",
     ):
         _ = FracturedJsonOptions(colon_padding=5)
 
     with pytest.raises(
-        ValueError,
-        match=r"Invalid value 'EolStyle\.CRLF' for option comment_policy",
+        TypeError,
+        match=r"Property CommentPolicy expects CommentPolicy enum, got EolStyle",
     ):
         _ = FracturedJsonOptions(comment_policy=EolStyle.CRLF)
+
     formatter = Formatter()
-    with pytest.raises(TypeError, match="json_text must be a str"):
+    with pytest.raises(TypeError, match="Reformat argument 0 must be str, got NoneType"):
         formatter.reformat(None)  # type: ignore[arg-type]
 
-    with pytest.raises(TypeError, match="json_text must be a str"):
+    with pytest.raises(TypeError, match="Minify argument 0 must be str, got bytes"):
         formatter.minify(b"{}")  # type: ignore[arg-type]
-
-    with pytest.raises(TypeError, match="Must be callable"):
-        formatter.string_length_func = 123  # type: ignore[assignment]
 
     options = FracturedJsonOptions()
     with pytest.raises(
         AttributeError,
-        match="FracturedJsonOptions has no attribute 'invalid'",
+        match="'FracturedJsonOptions' object has no attribute 'invalid'",
     ):
         _ = options.invalid
-
-    with pytest.raises(
-        AttributeError,
-        match="FracturedJsonOptions has no attribute 'invalid'",
-    ):
-        options.invalid = 0
 
 
 def test_dll_missing(path_is_file_fails):  # noqa: ARG001
@@ -141,15 +136,28 @@ def test_dll_missing(path_is_file_fails):  # noqa: ARG001
     assert "FracturedJson.dll not found" in str(exc.value)
 
 
-def test_load_runtime_fails(pythonnet_load_raises):  # noqa: ARG001
+def test_load_runtime_file_not_found():
     if "fractured_json" in sys.modules:
         del sys.modules["fractured_json"]
 
-    with pytest.raises(RuntimeError) as exc:
-        importlib.import_module("fractured_json")
+    from fractured_json._wrappergen import load_assembly  # noqa: PLC0415
 
-    assert "Failed to load pythonnet runtime" in str(exc.value)
-    assert "coreclr" in str(exc.value)
+    with pytest.raises(FileNotFoundError) as exc:
+        _ = load_assembly("InvalidPath")
+
+    assert "InvalidPath.dll not found at " in str(exc.value)
+
+
+def test_load_runtime_fails(path_is_file_succeeds):  # noqa: ARG001
+    if "fractured_json" in sys.modules:
+        del sys.modules["fractured_json"]
+
+    from fractured_json._wrappergen import load_assembly  # noqa: PLC0415
+
+    with pytest.raises(FileNotFoundError) as exc:
+        _ = load_assembly("InvalidPath")
+
+    assert "InvalidPath.dll load failed: Unable to find assembly " in str(exc.value)
 
 
 def test_string_length_property():
