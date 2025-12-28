@@ -24,6 +24,7 @@ def build_binaries() -> None:
     try:
         subprocess.run(cmd, check=True, capture_output=True, text=True)  # noqa: S603
     except subprocess.CalledProcessError as e:
+        print("🛑 CLI build failed")
         print(e.output)
         exit(1)
 
@@ -34,6 +35,7 @@ def parse_assets_json() -> tuple[Path, str]:
     """Parse project.assets.json for FracturedJson version."""
     assets_filename = BUILD_DIR / "obj" / "project.assets.json"
     if not assets_filename.exists():
+        print("🛑 project.assets.json missing")
         msg = f"Run 'dotnet restore' first: {assets_filename}"
         raise FileNotFoundError(msg)
 
@@ -61,7 +63,7 @@ def update_version(version: str) -> None:
             elif toml_version != version:
                 patch_version = True
             if patch_version:
-                line = f'version = "{version}'
+                line = f'version = "{version}'  # noqa: PLW2901
         new_project_toml += line + "\n"
     if patch_version:
         PYPROJECT_FILE.write_text(new_project_toml)
