@@ -1,9 +1,6 @@
 # fractured-json
 
-[![build:](https://github.com/masaccio/fractured-json-python/actions/workflows/run-all-tests.yml/badge.svg)](https://github.com/masaccio/fractured-json-python/actions/workflows/run-all-tests.yml)
-
-[![build:](https://github.com/masaccio/fractured-json-python/actions/workflows/codeql.yml/badge.svg)](https://github.com/masaccio/fractured-json-python/actions/workflows/codeql.yml)
-[![codecov](https://codecov.io/gh/masaccio/fractured-json-python/branch/main/graph/badge.svg?token=EKIUFGT05E)](https://codecov.io/gh/masaccio/fractured-json-python)
+[![build:](https://github.com/masaccio/fractured-json-python/actions/workflows/run-all-tests.yml/badge.svg)](https://github.com/masaccio/fractured-json-python/actions/workflows/run-all-tests.yml)[![build:](https://github.com/masaccio/fractured-json-python/actions/workflows/codeql.yml/badge.svg)](https://github.com/masaccio/fractured-json-python/actions/workflows/codeql.yml)[![codecov](https://codecov.io/gh/masaccio/fractured-json-python/branch/main/graph/badge.svg?token=EKIUFGT05E)](https://codecov.io/gh/masaccio/fractured-json-python)
 
 `fractured-json` is a python wrapper of [FracturedJson](https://github.com/j-brooke/FracturedJson) by [j-brooke](https://github.com/j-brooke). The package fully follows the .NET version and includes the required assembly to run as long as you have installed a suitabe .NET runtime.
 
