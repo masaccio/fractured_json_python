@@ -74,9 +74,8 @@ class NativeEnum:
     ) -> None:
         super().__init_subclass__(**kwargs)
 
-        # If class is dynamically constructed using type()
-        if hasattr(cls, "_native_type") and cls._native_type is not None:
-            native_type = cls._native_type
+        # Class is always dynamically constructed using type()
+        native_type = cls._native_type
 
         native_names = [
             str(x)

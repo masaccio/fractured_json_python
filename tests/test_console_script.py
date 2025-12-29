@@ -175,7 +175,7 @@ def test_in_place(script_runner, tmp_path):
     assert timestamp == tmp_file.stat().st_mtime_ns
 
 
-def test_output_mismatched_number_of_files(script_runner):
+def test_mismatched_file_count(script_runner):
     ret = script_runner.run(
         [
             "fractured-json",
