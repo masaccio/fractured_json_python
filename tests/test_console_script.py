@@ -1,7 +1,9 @@
 import re
 from io import StringIO
+from os import environ
 from pathlib import Path
 from shutil import copy
+from sys import modules
 from tomllib import loads as toml_loads
 
 import pytest
@@ -113,24 +115,25 @@ def test_unicode(script_runner):
 
 @pytest.mark.script_launch_mode("subprocess")
 def test_main(script_runner):
-    ret = script_runner.run(["python3", "-m", "fractured_json", "--help"])
+    # We need to run as a subprocess so we force the child to read coverage setup if
+    # the current pytest is running with coverage
+    env = environ.copy()
+    if "coverage" in modules:
+        env["COVERAGE_PROCESS_START"] = "pyproject.toml"
+    ret = script_runner.run(
+        ["python3", "-m", "fractured_json", "--help"],
+        print_result=False,
+        env=env,
+    )
     assert ret.stderr == ""
     assert ret.success
     assert "[-h] [-V] [--in-place] [--output OUTPUT]" in ret.stdout
 
 
-@pytest.mark.script_launch_mode("subprocess")
-def test_stdin(script_runner):
-    with open("tests/data/test-bool.json") as fh:
-        ret = script_runner.run(["fractured-json", "-"], stdin=fh)
-        assert ret.stderr == ""
-        assert ret.success
-        assert ret.stdout == '{ "bools": {"true": true, "false": false} }\n'
-
-
 def test_multifile(script_runner):
     ret = script_runner.run(
         ["fractured-json", "tests/data/test-bool.json", "tests/data/test-bool.json"],
+        print_result=False,
     )
     assert ret.stderr == ""
     assert ret.success
@@ -141,6 +144,7 @@ def test_output(script_runner, tmp_path):
     tmp_file = tmp_path / "test.json"
     ret = script_runner.run(
         ["fractured-json", "tests/data/test-bool.json", "--output", str(tmp_file)],
+        print_result=False,
     )
     assert ret.stderr == ""
     assert ret.success
@@ -152,6 +156,7 @@ def test_in_place(script_runner, tmp_path):
     copy(Path("tests/data/test-bool.json"), tmp_file)
     ret = script_runner.run(
         ["fractured-json", "--in-place", tmp_file],
+        print_result=False,
     )
     assert ret.stderr == ""
     assert ret.success
@@ -161,6 +166,7 @@ def test_in_place(script_runner, tmp_path):
 
     ret = script_runner.run(
         ["fractured-json", "--in-place", tmp_file],
+        print_result=False,
     )
     assert ret.stderr == ""
     assert ret.success
@@ -179,6 +185,7 @@ def test_output_mismatched_number_of_files(script_runner):
             "--output",
             "bar",
         ],
+        print_result=False,
     )
     assert ret.stderr == "fractured-json: the numbers of input and output file names do not match\n"
     assert ret.returncode == 1
@@ -186,7 +193,7 @@ def test_output_mismatched_number_of_files(script_runner):
 
 def test_pipe_stdin(script_runner):
     json_input_fh = StringIO(Path("tests/data/test-bool.json").read_text())
-    ret = script_runner.run(["fractured-json", "-"], stdin=json_input_fh)
+    ret = script_runner.run(["fractured-json", "-"], stdin=json_input_fh, print_result=False)
     assert ret.success
     assert ret.stderr == ""
     assert ret.success
@@ -196,6 +203,7 @@ def test_pipe_stdin(script_runner):
 def test_missing_file(script_runner, tmp_path):
     ret = script_runner.run(
         ["fractured-json", "file-does-not-exist.json"],
+        print_result=False,
     )
     assert not ret.success
     assert "[Errno 2] No such file or directory: 'file-does-not-exist.json'" in ret.stderr
